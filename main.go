@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"morakab/config"
+	mhand "morakab/handlers"
+	"morakab/pkg"
 
 	"github.com/gorilla/handlers"
 	_ "github.com/lib/pq"
 )
 
-func index(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello World"))
-}
+var DB *sql.DB
 
 func main() {
 	conn, _ := sql.Open("postgres", config.Cfg.DatabaseURL)
@@ -23,9 +23,15 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close()
+	DB = conn
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", index)
+
+	morakab := pkg.Morakab{DB: DB}
+	handler := &mhand.HTTPHandler{Morakab: &morakab}
+	mux.HandleFunc("/", handler.Index)
+	mux.HandleFunc("/register", handler.Register)
+	mux.HandleFunc("/login", handler.Login)
 
 	file, _ := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	multilogged := io.MultiWriter(file, os.Stdout)
