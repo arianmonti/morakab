@@ -12,6 +12,7 @@ import (
 	"morakab/pkg"
 
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
@@ -25,13 +26,13 @@ func main() {
 	defer conn.Close()
 	DB = conn
 
-	mux := http.NewServeMux()
+	mux := mux.NewRouter()
 
 	morakab := pkg.Morakab{DB: DB}
 	handler := &mhand.HTTPHandler{Morakab: &morakab}
 	mux.HandleFunc("/", handler.Index)
-	mux.HandleFunc("/register", handler.Register)
-	mux.HandleFunc("/login", handler.Login)
+	mux.HandleFunc("/register", handler.Register).Methods("POST")
+	mux.HandleFunc("/login", handler.Login).Methods("POST")
 
 	file, _ := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	multilogged := io.MultiWriter(file, os.Stdout)
