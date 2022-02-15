@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"morakab/models"
+	"morakab/pkg"
 	"net/http"
 )
 
@@ -32,13 +35,14 @@ func (h *HTTPHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HTTPHandler) Login(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	var user models.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Error parsing form"))
+		w.Write([]byte("Error parsing data"))
 		return
 	}
-	username := r.PostForm.Get("username")
-	password := r.PostForm.Get("password")
+	username := user.Username
+	password := user.Password
 
 	if username == "" || password == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -52,6 +56,11 @@ func (h *HTTPHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := pkg.GenerateToken(username)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("User Logged in successfully"))
+	fmt.Fprintf(w, "%s", token)
 }
