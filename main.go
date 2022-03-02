@@ -33,6 +33,7 @@ func main() {
 	mux.HandleFunc("/", handler.Index)
 	mux.HandleFunc("/register", handler.Register).Methods("POST")
 	mux.HandleFunc("/login", handler.Login).Methods("POST")
+	mux.HandleFunc("/book", handler.CreateBook).Methods("POST")
 
 	file, _ := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	multilogged := io.MultiWriter(file, os.Stdout)

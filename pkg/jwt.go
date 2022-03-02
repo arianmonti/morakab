@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"time"
 
 	"morakab/config"
@@ -20,4 +21,20 @@ func GenerateToken(username string) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func VerifyToken(tokenString string) (string, error) {
+	var secret []byte
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method %v", token.Header["alg"])
+		}
+		return secret, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return fmt.Sprint(claims["username"]), nil
+	} else {
+		return "", err
+	}
 }
