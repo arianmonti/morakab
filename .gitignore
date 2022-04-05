@@ -25,3 +25,4 @@ server.log
 
 !.vscode/*.code-snippets
 main
+cmd/morakab/main

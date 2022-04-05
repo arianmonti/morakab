@@ -55,8 +55,6 @@ func (m *Morakab) LoginUser(username string, password string) error {
 		if !CheckPasswordHash(password, password_hash) {
 			return errors.New("Invalid username or password")
 		}
-	} else if err == sql.ErrNoRows {
-		return errors.New("User not found")
 	} else {
 		return err
 	}
